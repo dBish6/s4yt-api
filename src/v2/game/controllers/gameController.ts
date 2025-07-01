@@ -93,9 +93,10 @@ export const saveAnswer = async (req: SaveAnswerRequestDto, res: Response) => {
     if (!userId) {
       throw new HttpError('User is not authenticated', 401);
     }
-    const { challenge_id, submission_link } = req.body;
+    // const { challenge_id, submission_link } = req.body;
 
-    await gameService.saveAnswer(challenge_id, userId, submission_link);
+    // Shouldn't save for the demo.
+    // await gameService.saveAnswer(challenge_id, userId, submission_link);
     res.status(200).json({ message: 'Answer submitted to challenge' });
   } catch (error: any) {
     res.status(500).json({ message: error.message });

@@ -4,7 +4,7 @@ import Business from '../../models/business';
 import ChestModel from '../../models/chest';
 import MultipleChoiceModel from '../../models/multipleChoice';
 import { LoginResponse } from '../dtos/AdminDto';
-import { compare } from "bcrypt";
+import { compare } from "bcryptjs";
 import jwt from 'jsonwebtoken';
 import UserModel from '../../models/user';
 import { resolveErrorHandler } from '../../middleware/errorHandler';

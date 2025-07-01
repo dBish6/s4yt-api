@@ -1,6 +1,6 @@
 import UserModel from "../../models/user";
 import User from "../../typings/User";
-import { hash, compare } from "bcrypt";
+import { hash, compare } from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import {
