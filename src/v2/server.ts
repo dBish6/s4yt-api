@@ -31,8 +31,6 @@ import authRouter from "./authentication/routes/authRoute";
 import gameRouter from "./game/routes/gameRoute";
 import busRouter from "./business/routes/busRoute";
 import locationRouter from "./location/routes/locationRoutes";
-import { scheduleRaffleDrawing } from "./utils/scheduler";
-import { CustomJwtPayload } from "./typings/express/Request";
 
 // Connect DB
 const app = express();
@@ -64,11 +62,11 @@ app.use(helmet()); // Protects various HTTP headers that can help defend against
 app.use(hpp()); // Protects against HTTP Parameter Pollution attacks.
 
 // Rate-limiting - used to limit repeated requests.
-/*app.use(rateLimit({
+app.use(rateLimit({
   windowMs: 5 * 60 * 1000, // 5 Minutes
   max: 100, // limit each IP to 100 requests per windowMs.
   message: "Too many requests made from this IP, please try again after 5 minutes."
-}));*/
+}));
 
 // Request logger.
 setupLogger(app);
@@ -90,5 +88,4 @@ const server = app.listen(PORT, process.env.HOST as string, () =>
   )
 );
 
-scheduleRaffleDrawing();
 initializeSocket(server);

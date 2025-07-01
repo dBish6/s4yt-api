@@ -8,7 +8,7 @@ import {
   sendResetPasswordEmail,
 } from "../services/emailService";
 import { HttpError, resolveErrorHandler } from "../../middleware/errorHandler";
-import { isoGameTimestamps } from "../../configs/timestamps";
+import { DEMO_USER_RESET, generateDemo } from "../../configs/demo";
 import { Error, HydratedDocument } from "mongoose";
 import { AcceptedReferralModel } from "../../models/acceptedReferrals";
 import { awardCoinsToUser } from "../../utils/coins";
@@ -21,9 +21,6 @@ const passwordMinLength = 8;
 const passwordMaxLength = 32;
 const passwordPattern =
   /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,32}$/;
-
-const preGameTimeMs = new Date(isoGameTimestamps.pre_game).getTime();
-const gameStartTimeMs = new Date(isoGameTimestamps.game_start).getTime();
 
 export const csrf = async () => {
   try {
@@ -109,7 +106,6 @@ export const register = async (userData: any) => {
     }
 
     const hashedPassword = await hash(userData.password, 12);
-    const inviterReferralCode = userData.referral_code;
     const newUserReferralCode = crypto.randomBytes(10).toString('hex');
 
     const newUser = new UserModel({
@@ -127,11 +123,6 @@ export const register = async (userData: any) => {
     await newUser.validate();
 
     awardCoinsToUser(newUser, 3, 'register', false);
-
-    // Only reward referral coins before game start
-    if (gameStartTimeMs > Date.now()) {
-      await handleReferralBonus(newUser, inviterReferralCode, 5);
-    }
 
     await newUser.save();
 
@@ -187,9 +178,21 @@ export const getAcceptedReferrals = async (userId: string) => {
 
 export const login = async (loginData: { email: string; password: string }) => {
   try {
-    const user = await UserModel.findOne(
+    const { coins, timestamps } = generateDemo();
+
+    const user = await UserModel.findOneAndUpdate(
       { email: loginData.email },
-      "city coins country education email is_email_verified name password referral_code chests_submitted region role school",
+      {
+        $set: {
+          coins,
+          ...DEMO_USER_RESET,
+          ...(!coins && { chests_submitted: {}, coin_transactions: [] })
+        }
+      },
+      {
+        new: true,
+        projection: "city coins country education email is_email_verified name password referral_code chests_submitted region role school"
+      }
     );
 
     if (!user) {
@@ -215,16 +218,10 @@ export const login = async (loginData: { email: string; password: string }) => {
 
     const csrfToken = crypto.randomBytes(32).toString("hex");
 
-    // If game or registration has started, send timestamps, otherwise send "not started" message
-    const resTimestamps =
-      preGameTimeMs > Date.now()
-        ? "The game has not started yet"
-        : isoGameTimestamps;
-
     return {
       user: userCredentials,
       coins: user.coins,
-      timestamps: resTimestamps,
+      timestamps,
       jwtToken,
       csrfToken,
     };
