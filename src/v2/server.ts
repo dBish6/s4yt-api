@@ -82,6 +82,10 @@ app.use(`${baseUrl}/business`, busRouter);
 app.use(`${baseUrl}/location`, locationRouter);
 app.use(routeErrorHandler);
 
+app.get("/", async (_, res) => {
+  res.json({ message: "Hello from s4yt-demo!" });
+});
+
 const server = app.listen(PORT, process.env.HOST as string, () =>
   console.log(
     `Server is running on ${process.env.PROTOCOL}${process.env.HOST}:${PORT}; Ctrl-C to terminate...`

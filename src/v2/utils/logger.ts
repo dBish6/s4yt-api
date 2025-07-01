@@ -12,7 +12,7 @@ const logFormat = ':method :url :status :response-time ms \n headers: :all-heade
 export const setupLogger = (app: Express) => {
   const logDir = path.resolve(process.cwd(), process.env.LOG_PATH || 'logs');
 
-  if (!fs.existsSync(logDir)) {
+  if (!fs.existsSync(logDir) && process.env.LOG_FILE_ON === "true") {
     fs.mkdirSync(logDir, { recursive: true });
   }
 
@@ -38,19 +38,23 @@ export const setupLogger = (app: Express) => {
     ),
   );
 
-  const transports = [
-    new winston.transports.Console(),
-    new DailyRotateFile({
-      filename: '%DATE%',
-      dirname: logDir,
-      frequency: process.env.LOG_FREQUENCY || 'daily',
-      datePattern: 'YYYY-MM-DD',
-      zippedArchive: true,
-      maxSize: process.env.LOG_SIZE || '100M',
-      auditFile: `${logDir}/audit.json`,
-      extension: '.log',
-    }),
-  ];
+  const transports: winston.transport[] = [];
+  transports.push(new winston.transports.Console());
+
+  if (process.env.LOG_FILE_ON === "true") {
+    transports.push(
+      new DailyRotateFile({
+        filename: '%DATE%',
+        dirname: logDir,
+        frequency: process.env.LOG_FREQUENCY || 'daily',
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: true,
+        maxSize: process.env.LOG_SIZE || '100M',
+        auditFile: `${logDir}/audit.json`,
+        extension: '.log'
+      })
+    );
+  }
 
   logger = winston.createLogger({
     level: level(),
@@ -66,7 +70,7 @@ export const setupLogger = (app: Express) => {
 
   app.use(
     morgan(logFormat, {
-      stream: process.env.LOG_FILE_ON
+      stream: process.env.LOG_FILE_ON === "true"
         ? {
             write: message => logger.http(message.trim()),
           }

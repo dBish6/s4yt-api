@@ -1,0 +1,35 @@
+app = "s4yt-demo"
+primary_region = "yul"
+
+[build]
+  dockerfile = "./Dockerfile"
+  ignorefile = "./.dockerignore"
+
+[env]
+  NODE_ENV = "production"
+  PROTOCOL = "https://"
+  HOST = "0.0.0.0"
+  PORT = "4001"
+
+[http_service]
+  internal_port = 4001
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 40
+    soft_limit = 30
+
+  [[http_service.checks]]
+    grace_period = "15s"
+    interval = "24h0m0s"
+    timeout = "10s"
+    method = "GET"
+    path = "/"
+
+[[vm]]
+  memory = "256mb"
+  size = "shared-cpu-1x"

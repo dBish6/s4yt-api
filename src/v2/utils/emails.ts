@@ -7,9 +7,14 @@ export const loadEmailTemplate = (filename: string) => {
   // and ES modules doesn't have __dirname
   // See https://github.com/webpack/webpack/issues/18320
 
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
- return fs.readFileSync(path.resolve(__dirname, '../emailTemplates', filename), 'utf8');
+ return fs.readFileSync(
+   path.resolve(
+     process.env.NODE_ENV === "production" ? process.cwd() : path.dirname(fileURLToPath(import.meta.url)),
+     process.env.NODE_ENV === "production" ? "emailTemplates" : "../emailTemplates",
+     filename
+   ),
+   "utf8"
+ );
 }
 
 export const fillTemplate = (html: string, substitutions: [string, string][]) => {

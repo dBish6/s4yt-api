@@ -16,7 +16,7 @@
     "type": "git",
     "url": "git+https://github.com/buildingu/s4yt-api.git"
   },
-  "main": "src/v1/server.ts",
+  "main": "src/v2/server.ts",
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon",
@@ -28,7 +28,7 @@
     "copyWinners": "node --loader ts-node/esm --experimental-specifier-resolution=node ./src/v2/seeders/copyWinners.ts",
     "generateTestCodes": "node --loader ts-node/esm --experimental-specifier-resolution=node ./src/v2/seeders/utils.ts",
     "build": "webpack --config webpack.config.cjs",
-    "serve": "cross-env NODE_ENV=production node ./build/server.cjs",
+    "serve": "node ./server.cjs",
     "clean": "rm -rf node_modules"
   },
   "dependencies": {
